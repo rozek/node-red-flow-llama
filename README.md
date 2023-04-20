@@ -55,7 +55,7 @@ All properties (except the prompt itself) are optional. If given, they should be
 
 The file [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json) contains an example which uses the LLaMA function node to answer HTTP requests. The prompt itself and any inference parameters have to be passed as query parameters, the result of the inference will then be returned in the body of the HTTP response.
 
-> Nota bene: the screenshot from above shows a modified version of this flow including an authentication node, the flow in [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json) comes without authentication.
+> Nota bene: the screenshot from above shows a modified version of this flow including an authentication node from the author's [Node-RED Authorization Examples](https://github.com/rozek/node-red-authorization-examples), the flow in [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json) comes without any authentication.
 
 The following parameters are supported (most of them will be copied into a `msg` property of the same name):
 
