@@ -10,6 +10,8 @@ Having the actual inference as a self-contained function node gives you the poss
 
 ## Installation ##
 
+### Preparing the Model ###
+
 ## Usage ##
 
 The prompt itself and any inference parameters have to be passed as properties of the msg object. The following properties are supported:
