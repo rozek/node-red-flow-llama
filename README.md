@@ -10,15 +10,19 @@ Having the actual inference as a self-contained function node gives you the poss
 
 ## Installation ##
 
-The actual "heavy lifting" is done by [llama.cpp](https://github.com/ggerganov/llama.cpp). Simply follow the instructions found in section [Usage](https://github.com/ggerganov/llama.cpp#usage) to build the CLI command `main` for your platform.
+Start by creating a subfolder called `ai` within the installation folder of your Node-RED server. This subfolder will later store both the executable and the actual model. Using such a subfolder helps keeping the folder structure of your server clean if you decide to play with other AI models as well.
 
-Afterwards, rename `main` to `llama` and copy it into a subfolder called `ai` within the installation folder of your Node-RED server
+### Building the Executable ###
+
+The actual "heavy lifting" is done by [llama.cpp](https://github.com/ggerganov/llama.cpp). Simply follow the instructions found in section [Usage](https://github.com/ggerganov/llama.cpp#usage) of the llama.cpp docs to build the `main` executable for your platform.
+
+Afterwards, rename `main` to `llama` and copy it into the subfolder `ai` you created before.
 
 ### Preparing the Model ###
 
-Once you got the actual LLaMA model, follow the instructions found in section [Prepare Data & Run](https://github.com/ggerganov/llama.cpp#prepare-data--run) to bring it into the proper format.
+Once you got the actual LLaMA model, follow the instructions found in section [Prepare Data & Run](https://github.com/ggerganov/llama.cpp#prepare-data--run) of the llama.cpp docs to bring it into the proper format.
 
-Afterwards, rename the file `ggml-model-q4_0.bin` to `ggml-llama-7b-q4.bin` and move (or copy) it into the same subfolder `ai` within the installation folder of your Node-RED server where you already placed the `llama` executable.
+Afterwards, rename the file `ggml-model-q4_0.bin` to `ggml-llama-7b-q4.bin` and move (or copy) it into the same subfolder `ai` where you already placed the `llama` executable.
 
 ### Importing the Function Node ###
 
@@ -31,15 +35,15 @@ The prompt itself and any inference parameters have to be passed as properties o
 The following properties are supported:
 
 * `payload` - this is the actual prompt 
-* `seed` - 
-* `threads` - 
-* `context` - 
-* `keep` - 
-* `predict` - 
-* `topk` - 
-* `topp` - 
-* `temperature` - 
-* `batches` - 
+* `seed` - seed value for the internal pseudo random number generator (integer, default: -1, use random seed for <= 0)
+* `threads` - number of threads to use during computation (integer ≧ 1, default: 4)
+* `context` - size of the prompt context (integer ≧ 0, default: 512)
+* `keep` - number of tokens to keep from the initial prompt (integer ≧ -1, default: 0, -1 = all)
+* `predict` - number of tokens to predict (integer ≧ -1, default: 128, -1 = infinity)
+* `topk` - top-k sampling limit (integer ≧ 1, default: 40)
+* `topp` - top-p sampling limit (0.0...1.0, default: 0.9)
+* `temperature` - temperature (0.0...1.0, default: 0.8)
+* `batches` - batch size for prompt processing (integer ≧ 1, default: 8)
 
 All properties (except the prompt itself) are optional. If given, they should be strings (even if they contain numbers), this makes it simpler to extract them from an HTTP request.
 
