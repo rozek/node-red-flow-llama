@@ -76,6 +76,8 @@ In order to install this flow, simply open the Flow Editor of your Node-RED serv
 
 The file [LLaMA.html](./LLaMA.html) contains a trivial web page which can act as a user interface for the HTTP endpoint. Ideally, this page should be served from the same Node-RED server that also accepts the HTTP requests for LLaMA, but this is not strictly necessary.
 
+![LLaMA Screenshot](./LLaMA-Screenshot.png)
+
 > Nota bene: **inference is still done on the Node-RED server**, not within your browser!
 
 ## License ##
