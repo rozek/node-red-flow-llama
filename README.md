@@ -16,16 +16,18 @@ Having the actual inference as a self-contained function node gives you the poss
 
 The prompt itself and any inference parameters have to be passed as properties of the msg object. The following properties are supported:
 
-* payload
-* seed
-* threads
-* context
-* keep
-* predict
-* topk
-* topp
-* temperature
-* batches
+* `payload` - this is the actual prompt 
+* `seed` - 
+* `threads` - 
+* `context` - 
+* `keep` - 
+* `predict` - 
+* `topk` - 
+* `topp` - 
+* `temperature` - 
+* `batches` - 
+
+All properties (except the prompt itself) are optional. If given, they should be strings (even if they contain numbers), this makes it simpler to extract them from an HTTP request.
 
 ## Example ##
 
