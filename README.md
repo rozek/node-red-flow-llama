@@ -44,6 +44,12 @@ The file [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json) contains an exam
 * `temperature` - will be copied into `msg.temperature`
 * `batches` - will be copied into `msg.batches`
 
+In order to install this flow, simply open the Flow Editor of your Node-RED server and import the contents of [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json)
+
+### Web Page ###
+
+The file [LLaMA.html](./LLaMA.html) contains a trivial web page which can serve as a user interface for the HTTP endpoint. Ideally, this page should be served from the same Node-RED server that also accepts the HTTP requests for LLaMA, but this is not strictly necessary.
+
 ## License ##
 
 [MIT License](LICENSE.md)
