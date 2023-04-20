@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en" style="width:100%">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+
+  <meta name="apple-mobile-web-app-capable"          content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+  <meta name="format-detection"                      content="telephone=no">
+
+  <style name="mobile-prologue">
+    html {
+      text-size-adjust: 100%;
+      -moz-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+      -o-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    html, body {
+      width:99%; height:99%;
+    }
+
+    html { overflow:hidden scroll }
+  </style>
+
+ <style name="blue-textured-background">
+  html, body {
+    background-color: #627AC6;
+    background-image: url(/common/BinaryTexture.png);
+    background-repeat:repeat;
+
+    font-family:'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+    font-size:14px; font-weight:400; color:white;
+    line-height:150%;
+  }
+
+  * {
+    -moz-box-sizing:border-box; -webkit-box-sizing:border-box; box-sizing:border-box;
+  }
+ </style>
+
+ <script name="clear-console">
+  if (typeof console.clear === 'function') {
+    console.clear()
+  }
+ </script>
+
+ <script name="dommali">
+;(function () {
+  let exports = {}
+  ;(function (exports) {
+  "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/**** ValueIsNumber ****/
+function ValueIsNumber(Value) {
+    return (typeof Value === 'number') || (Value instanceof Number);
+}
+/**** ValueIsString ****/
+function ValueIsString(Value) {
+    return (typeof Value === 'string') || (Value instanceof String);
+}
+/**** ValueIsFunction ****/
+function ValueIsFunction(Value) {
+    return (typeof Value === 'function');
+}
+/**** ValueIsEventNameWithSelector ****/
+const NameWithSelectorPattern = /^[a-z$_][a-z$_0-9]*([-.:][a-z$_0-9]+)*@.*$/i;
+function ValueIsEventNameWithSelector(Value) {
+    return ((typeof Value === 'string') || (Value instanceof String)) && NameWithSelectorPattern.test(Value);
+}
+/**** ValueIsArray ****/
+const ValueIsArray = Array.isArray;
+/**** asArray ****/
+function asArray(Value) {
+    return Array.prototype.slice.call(Value);
+}
+/**** ValueIsHTMLElement ****/
+function ValueIsHTMLElement(Value) {
+    return (Value instanceof HTMLElement);
+}
+/**** asHTMLElement ****/
+function asHTMLElement(Candidate) {
+    return (ValueIsHTMLElement(Candidate) ? Candidate : undefined);
+}
+/**** asListOfHTMLElements ****/
+function asListOfHTMLElements(Candidates) {
+    return Candidates.filter((Candidate) => ValueIsHTMLElement(Candidate));
+}
+/**** ValueIsEmptyObject ****/
+let hasOwnProperty = Object.prototype.hasOwnProperty;
+function ValueIsEmptyObject(Value) {
+    for (let Key in Value) {
+        if (hasOwnProperty.call(Value, Key)) {
+            return false;
+        }
+    }
+    return true;
+}
+/**** CamelCased ****/
+function CamelCased(Text) {
+    return Text.replace(/-[a-z]/ig, (Match) => Match[1].toUpperCase());
+}
+/**** DisplayDefaultFor ****/
+const DisplayDefaultSet = {};
+function DisplayDefaultFor(TagName) {
+    if (TagName in DisplayDefaultSet) {
+        return DisplayDefaultSet[TagName];
+    }
+    let auxElement = document.createElement(TagName);
+    document.body.appendChild(auxElement);
+    let DisplayDefault = getComputedStyle(auxElement).display;
+    if (DisplayDefault === 'none') {
+        DisplayDefault = 'block';
+    }
+    DisplayDefaultSet[TagName] = DisplayDefault;
+    document.body.removeChild(auxElement);
+    return DisplayDefault;
+}
+/**** unhashed - convert #<id> into [id="<id>"] ****/
+function unhashed(Selector) {
+    return (Selector.startsWith('#')
+        ? '[id="' + Selector.slice(1) + '"]' // not perfect
+        : Selector);
+}
+class DOMMaLi {
+    constructor() {
+        this.Subjects = [];
+    }
+    /**** ready - similar to jQuery.ready ****/
+    static ready(FunctionToCall) {
+        if (DOMisReady && !ReadyFunctionsAreRunning) {
+            FunctionToCall(); // may fail!
+        }
+        else {
+            ReadyFunctionsToCall.push(FunctionToCall);
+        }
+        return this;
+    }
+    static textWidth(Text, TemplateOrSettings) {
+        if (DOMisReady) {
+            if (_DOMMaLi._auxiliarySpan == null) {
+                let auxiliarySpan = document.createElement('span');
+                auxiliarySpan.style.visibility = 'hidden';
+                document.body.appendChild(auxiliarySpan);
+                _DOMMaLi._auxiliarySpan = dommali(auxiliarySpan);
+            }
+            let auxiliarySpan = _DOMMaLi._auxiliarySpan;
+            auxiliarySpan.css({
+                width: 'auto', 'min-width': 0, 'max-width': 'none',
+                margin: 0, padding: 0, border: 'none', font: 'normal',
+                'white-space': 'normal', 'letter-spacing': 'normal', 'word-spacing': 'normal',
+                'text-indent': 0, 'text-transform': 'none'
+            });
+            if (TemplateOrSettings) {
+                let Settings;
+                switch (true) {
+                    case (typeof TemplateOrSettings === 'object') && ((Object.getPrototypeOf(TemplateOrSettings) === Object.prototype) ||
+                        (Object.getPrototypeOf(TemplateOrSettings) == null)):
+                        Settings = TemplateOrSettings;
+                        break;
+                    case TemplateOrSettings instanceof DOMMaLi:
+                    case TemplateOrSettings instanceof Element:
+                        // @ts-ignore allow assignment to "Settings"
+                        Settings = window.getComputedStyle(
+                        // @ts-ignore dommali(...) does return a DOMMaLi instance
+                        dommali(TemplateOrSettings).subject(0));
+                        break;
+                    default:
+                        throw new TypeError('DOMMaLi instance, HTML element or settings expected');
+                }
+                _DOMMaLi._relevantSettings_for_textWidth.forEach((relevantSetting) => {
+                    const ValueOfSetting = Settings[relevantSetting];
+                    if (ValueOfSetting != null) {
+                        auxiliarySpan.css(relevantSetting, ValueOfSetting);
+                    }
+                });
+            }
+            // @ts-ignore "auxiliarySpan" is defined and "text" returns it
+            return auxiliarySpan.text(Text).width(); // performs actual measurement
+        }
+        else {
+            return NaN;
+        }
+    }
+    static textHeight(Text, TemplateOrSettings) {
+        if (DOMisReady) {
+            if (_DOMMaLi._auxiliaryDiv == null) {
+                let auxiliaryDiv = document.createElement('div');
+                auxiliaryDiv.style.visibility = 'hidden';
+                document.body.appendChild(auxiliaryDiv);
+                _DOMMaLi._auxiliaryDiv = dommali(auxiliaryDiv);
+            }
+            let auxiliaryDiv = _DOMMaLi._auxiliaryDiv;
+            auxiliaryDiv.css({
+                width: 'auto', 'min-width': 0, 'max-width': 'none',
+                margin: 0, padding: 0, border: 'none', font: 'normal',
+                'white-space': 'normal', 'letter-spacing': 'normal', 'word-spacing': 'normal',
+                'text-indent': 0, 'text-transform': 'none'
+            });
+            if (TemplateOrSettings) {
+                let Settings;
+                switch (true) {
+                    case (typeof TemplateOrSettings === 'object') && ((Object.getPrototypeOf(TemplateOrSettings) === Object.prototype) ||
+                        (Object.getPrototypeOf(TemplateOrSettings) == null)):
+                        Settings = TemplateOrSettings;
+                        break;
+                    case TemplateOrSettings instanceof DOMMaLi:
+                    case TemplateOrSettings instanceof Element:
+                        // @ts-ignore allow assignment to "Settings"
+                        Settings = window.getComputedStyle(
+                        // @ts-ignore dommali(...) does return a DOMMaLi instance
+                        dommali(TemplateOrSettings).subject(0));
+                        break;
+                    default:
+                        throw new TypeError('DOMMaLi instance, HTML element or settings expected');
+                }
+                _DOMMaLi._relevantSettings_for_textHeight.forEach((relevantSetting) => {
+                    const ValueOfSetting = Settings[relevantSetting];
+                    if (ValueOfSetting != null) {
+                        auxiliaryDiv.css(relevantSetting, ValueOfSetting);
+                    }
+                });
+            }
+            // @ts-ignore "auxiliaryDiv" is defined and "text" returns it
+            return auxiliaryDiv.text(Text).height(); // performs actual measurement
+        }
+        else {
+            return NaN;
+        }
+    }
+    /**** extraParametersOfEvent ****/
+    static extraParametersOfEvent(Event) {
+        let extraParameters = Event['_extraParameters'];
+        return (Array.isArray(extraParameters) ? extraParameters.slice() : []);
+    }
+    /**** get length ****/
+    get length() {
+        return this.Subjects.length;
+    }
+    /**** size ****/
+    size() {
+        return this.Subjects.length;
+    }
+    /**** isEmpty ****/
+    isEmpty() {
+        return (this.Subjects.length === 0);
+    }
+    /**** subjects ****/
+    subjects() {
+        return this.Subjects.slice();
+    }
+    /**** subject ****/
+    subject(Index) {
+        return this.Subjects[Index];
+    }
+    /**** indexOf ****/
+    indexOf(Value) {
+        if (Value instanceof DOMMaLi) {
+            Value = Value.Subjects[0];
+            if (Value == null) {
+                return -1;
+            }
+        }
+        return this.Subjects.indexOf(Value);
+    }
+    /**** slice ****/
+    slice(start, end) {
+        return new _DOMMaLi(this.Subjects.slice(start, end));
+    }
+    /**** first ****/
+    first() {
+        return new _DOMMaLi(this.Subjects[0]);
+    }
+    /**** last ****/
+    last() {
+        return new _DOMMaLi(this.Subjects[this.Subjects.length - 1]);
+    }
+    /**** eq ****/
+    eq(Index) {
+        return new _DOMMaLi(this.Subjects[Index]);
+    }
+    /**** forEach ****/
+    forEach(Callback) {
+        this.Subjects.forEach((Subject, Index) => {
+            Callback(new _DOMMaLi(Subject), Index, this);
+        });
+        return this;
+    }
+    /**** filter ****/
+    filter(SelectorOrCallback) {
+        if (typeof SelectorOrCallback === 'function') {
+            return new _DOMMaLi(this.Subjects.filter((Subject, Index) => {
+                return SelectorOrCallback(new _DOMMaLi(Subject), Index, this);
+            }));
+        }
+        else {
+            return new _DOMMaLi(this.Subjects.filter((Subject) => {
+                return Subject.matches(unhashed(SelectorOrCallback));
+            }));
+        }
+    }
+    /**** tagName ****/
+    tagName() {
+        return (this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].tagName.toLowerCase());
+    }
+    /**** matches ****/
+    matches(Selector) {
+        return this.Subjects.every((Subject) => Subject.matches(unhashed(Selector)));
+    }
+    /**** is ****/
+    is(Value) {
+        switch (true) {
+            case ValueIsString(Value):
+                return this.matches(unhashed(Value));
+            case (Value instanceof _DOMMaLi):
+                let Candidate = Value;
+                return ((this.Subjects.length === Candidate.Subjects.length) &&
+                    this.Subjects.every((Element, Index) => (Candidate.Subjects[Index] === Element)));
+                break;
+            case (Value instanceof Element):
+                return ((this.Subjects.length === 1) &&
+                    (this.Subjects[0] === Value));
+            default:
+                return false;
+        }
+    }
+    /**** find ****/
+    find(Selector) {
+        return new _DOMMaLi(this.Subjects.length === 0
+            ? undefined
+            : asArray(this.Subjects[0].querySelectorAll(unhashed(Selector))));
+    }
+    /**** findFirst ****/
+    findFirst(Selector) {
+        return new _DOMMaLi((this.Subjects.length === 0)
+            ? undefined
+            : this.Subjects[0].querySelector(unhashed(Selector)));
+    }
+    /**** parent ****/
+    parent() {
+        return new _DOMMaLi(this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].parentElement);
+    }
+    /**** closest ****/
+    closest(Selector) {
+        return new _DOMMaLi(this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].closest(unhashed(Selector)));
+    }
+    /**** isAttached ****/
+    isAttached() {
+        return (this.Subjects.length === 0
+            ? false
+            : document.contains(this.Subjects[0]));
+    }
+    /**** contains ****/
+    contains(Candidate) {
+        return ((this.Subjects.length === 0) || (Candidate.Subjects.length === 0)
+            ? false
+            : Candidate.Subjects.every((Candidate) => this.Subjects[0].contains(Candidate)));
+    }
+    /**** children ****/
+    children(Selector) {
+        let ChildElements = (this.Subjects.length === 0
+            ? []
+            : asArray(this.Subjects[0].children));
+        if (Selector != null) {
+            ChildElements = ChildElements.filter((Subject) => Subject.matches(unhashed(Selector)));
+        }
+        return new _DOMMaLi(ChildElements);
+    }
+    /**** firstChild ****/
+    firstChild(Selector) {
+        if (this.Subjects.length === 0) {
+            return new _DOMMaLi();
+        }
+        if (Selector == null) {
+            return new _DOMMaLi(this.Subjects[0].firstElementChild);
+        }
+        else {
+            return new _DOMMaLi(asArray(this.Subjects[0].children).find((Subject) => Subject.matches(unhashed(Selector))));
+        }
+    }
+    /**** lastChild ****/
+    lastChild(Selector) {
+        if (this.Subjects.length === 0) {
+            return new _DOMMaLi();
+        }
+        if (Selector == null) {
+            return new _DOMMaLi(this.Subjects[0].lastElementChild);
+        }
+        else {
+            let ChildElements = asArray(this.Subjects[0].children);
+            for (let i = ChildElements.length - 1; i >= 0; i--) {
+                if (ChildElements[i].matches(unhashed(Selector))) {
+                    return new _DOMMaLi(ChildElements[i]);
+                }
+            }
+            return new _DOMMaLi();
+        }
+    }
+    /**** prev ****/
+    prev(Selector) {
+        if (this.Subjects.length === 0) {
+            return new _DOMMaLi();
+        }
+        if (Selector == null) {
+            return new _DOMMaLi(this.Subjects[0].previousElementSibling);
+        }
+        else {
+            let Sibling = this.Subjects[0].previousElementSibling;
+            while (Sibling != null) {
+                if (Sibling.matches(unhashed(Selector))) {
+                    return new _DOMMaLi(Sibling);
+                }
+                Sibling = Sibling.previousElementSibling;
+            }
+            return new _DOMMaLi();
+        }
+    }
+    /**** next ****/
+    next(Selector) {
+        if (this.Subjects.length === 0) {
+            return new _DOMMaLi();
+        }
+        if (Selector == null) {
+            return new _DOMMaLi(this.Subjects[0].nextElementSibling);
+        }
+        else {
+            let Sibling = this.Subjects[0].nextElementSibling;
+            while (Sibling != null) {
+                if (Sibling.matches(unhashed(Selector))) {
+                    return new _DOMMaLi(Sibling);
+                }
+                Sibling = Sibling.nextElementSibling;
+            }
+            return new _DOMMaLi();
+        }
+    }
+    /**** positionInViewport - CONSIDERING transforms! ****/
+    positionInViewport() {
+        if (this.Subjects.length === 0) {
+            return undefined;
+        }
+        let Bounds = this.Subjects[0].getBoundingClientRect();
+        return { left: Bounds.left, top: Bounds.top };
+    }
+    /**** positionInParent - without taking transforms into account ****/
+    positionInParent() {
+        if ((this.Subjects.length === 0) ||
+            (this.Subjects[0].parentElement == null) ||
+            (!(this.Subjects[0] instanceof HTMLElement))) {
+            return undefined;
+        }
+        let Subject = this.Subjects[0];
+        return (Subject instanceof HTMLElement
+            ? { left: Subject.offsetLeft, top: Subject.offsetTop }
+            : undefined);
+    }
+    /**** positionOnPage - without taking transforms into account ****/
+    positionOnPage() {
+        if (this.Subjects.length === 0) {
+            return undefined;
+        }
+        let Bounds = this.Subjects[0].getBoundingClientRect();
+        return {
+            left: Bounds.left + document.body.scrollLeft,
+            top: Bounds.top + document.body.scrollTop
+        };
+    }
+    // see https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
+    // and https://jsbin.com/kimaxojufe/1/edit?css,js,console,output
+    /**** width - without taking transforms into account ****/
+    width(newValue) {
+        if (newValue === undefined) {
+            let Subject = this.Subjects[0];
+            if (Subject instanceof HTMLElement) {
+                return Subject.offsetWidth;
+            }
+            else {
+                return undefined;
+            }
+        }
+        else {
+            this.Subjects.forEach((Subject) => {
+                if (Subject instanceof HTMLElement) {
+                    Subject.style.width = newValue + 'px';
+                }
+            });
+            return this;
+        }
+    }
+    /**** height - without taking transforms into account ****/
+    height(newValue) {
+        if (newValue === undefined) {
+            let Subject = this.Subjects[0];
+            if (Subject instanceof HTMLElement) {
+                return Subject.offsetHeight;
+            }
+            else {
+                return undefined;
+            }
+        }
+        else {
+            this.Subjects.forEach((Subject) => {
+                if (Subject instanceof HTMLElement) {
+                    Subject.style.height = newValue + 'px';
+                }
+            });
+            return this;
+        }
+    }
+    /**** innerWidth/Height - without taking transforms into account ****/
+    innerWidth() {
+        return (this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].clientWidth);
+    }
+    innerHeight() {
+        return (this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].clientHeight);
+    }
+    /**** renderWidth/Height - CONSIDERING transforms ****/
+    renderWidth() {
+        return (this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].getBoundingClientRect().width);
+    }
+    renderHeight() {
+        return (this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].getBoundingClientRect().height);
+    }
+    /**** scrollLeft/Top/Width/Height ****/
+    scrollLeft(newValue) {
+        if (newValue === undefined) {
+            return (this.Subjects.length === 0
+                ? undefined
+                : this.Subjects[0].scrollLeft);
+        }
+        else {
+            this.Subjects.forEach((Subject) => {
+                Subject.scrollLeft = newValue;
+            });
+            return this;
+        }
+    }
+    scrollTop(newValue) {
+        if (newValue === undefined) {
+            return (this.Subjects.length === 0
+                ? undefined
+                : this.Subjects[0].scrollTop);
+        }
+        else {
+            this.Subjects.forEach((Subject) => {
+                Subject.scrollTop = newValue;
+            });
+            return this;
+        }
+    }
+    scrollWidth() {
+        return (this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].scrollWidth);
+    }
+    scrollHeight() {
+        return (this.Subjects.length === 0
+            ? undefined
+            : this.Subjects[0].scrollHeight);
+    }
+    /**** scrollTo ****/
+    scrollTo(x, y, Mode = 'auto') {
+        let Options = { left: x, top: y, behavior: Mode };
+        this.Subjects.forEach((Subject) => {
+            Subject.scrollTo(Options);
+        });
+        return this;
+    }
+    /**** show ****/
+    show() {
+        this.Subjects.forEach((Subject) => {
+            if (Subject instanceof HTMLElement) {
+                let computedStyle = getComputedStyle(Subject);
+                if (computedStyle.display !== 'none') {
+                    return;
+                }
+                if (Subject['_preservedDisplay'] != null) {
+                    Subject.style.display = Subject['_preservedDisplay']; // may set to ''
+                }
+                if (computedStyle.display === 'none') {
+                    Subject.style.display = DisplayDefaultFor(Subject.tagName);
+                }
+            }
+        });
+        return this;
+    }
+    /**** hide ****/
+    hide() {
+        this.Subjects.forEach((Subject) => {
+            if (Subject instanceof HTMLElement) {
+                let computedStyle = getComputedStyle(Subject);
+                if (computedStyle.display === 'none') {
+                    return;
+                }
+                Subject['_preservedDisplay'] = Subject.style.display; // may be ''
+                Subject.style.display = 'none';
+            }
+        });
+        return this;
+    }
+    /**** hasClass ****/
+    hasClass(Classes) {
+        if (this.Subjects.length === 0) {
+            return false;
+        }
+        Classes = Classes.trim().replace(/\s+/g, ' ');
+        if (Classes === '') {
+            return false;
+        }
+        let ClassList = this.Subjects[0].classList;
+        return Classes.split(' ').every((Class) => ClassList.contains(Class));
+    }
+    /**** addClass ****/
+    addClass(Classes) {
+        return this._processClasses(Classes, 'add');
+    }
+    /**** toggleClass ****/
+    toggleClass(Classes) {
+        return this._processClasses(Classes, 'toggle');
+    }
+    /**** removeClass ****/
+    removeClass(Classes) {
+        return this._processClasses(Classes, 'remove');
+    }
+    /**** _processClasses ****/
+    _processClasses(Classes, Method) {
+        if (this.Subjects.length === 0) {
+            return this;
+        }
+        Classes = Classes.trim().replace(/\s+/g, ' ');
+        if (Classes === '') {
+            return this;
+        }
+        const ClassesToProcess = Classes.split(' ');
+        this.Subjects.forEach((Subject) => {
+            let ClassList = Subject.classList;
+            ClassesToProcess.forEach((Class) => ClassList[Method](Class));
+        });
+        return this;
+    }
+    /**** append ****/
+    append(Content) {
+        return this._insert(Content, 'append');
+    }
+    /**** prepend ****/
+    prepend(Content) {
+        return this._insert(Content, 'prepend');
+    }
+    /**** insertAfter ****/
+    insertAfter(Content) {
+        Content._insert(this, 'after');
+        return this;
+    }
+    /**** insertBefore ****/
+    insertBefore(Content) {
+        Content._insert(this, 'before');
+        return this;
+    }
+    /**** _insert ****/
+    _insert(Content, Method) {
+        if (this.Subjects.length === 0) {
+            return this;
+        }
+        let Contents = (Content instanceof DOMMaLi
+            ? Content
+            : new _DOMMaLi(Content));
+        if (Contents.Subjects.length === 0) {
+            return this;
+        }
+        if (ValueIsString(Content) && Content.startsWith('<')) {
+            this.Subjects.forEach((Subject, Index) => {
+                Subject[Method].apply(Subject, Contents.Subjects);
+                if (Index < this.Subjects.length - 1) {
+                    Contents = new _DOMMaLi(Content);
+                }
+            });
+        }
+        else {
+            this.Subjects[0][Method].apply(this.Subjects[0], Contents.Subjects);
+        }
+        return this;
+    }
+    /**** replaceWith ****/
+    replaceWith(Replacement) {
+        if (this.Subjects.length === 0) {
+            return;
+        }
+        let Replacements = (Replacement instanceof DOMMaLi
+            ? Replacement
+            : new _DOMMaLi(Replacement));
+        if (Replacements.Subjects.length === 0) {
+            this.remove();
+            return;
+        }
+        if (ValueIsString(Replacement) && Replacement.startsWith('<')) {
+            this.Subjects.forEach((Subject, Index) => {
+                Subject.replaceWith.apply(Subject, Replacements.Subjects);
+                if (Index < this.Subjects.length - 1) {
+                    Replacements = new _DOMMaLi(Replacement);
+                }
+            });
+        }
+        else {
+            this.Subjects[0].replaceWith.apply(this.Subjects[0], Replacements.Subjects);
+        }
+    }
+    /**** remove ****/
+    remove() {
+        if (this.Subjects.length === 0) {
+            return this;
+        }
+        this.Subjects.forEach((Subject) => {
+            Subject.remove();
+        });
+        return this;
+    }
+    /**** prop ****/
+    prop(Property, newValue) {
+        if (newValue === undefined) {
+            return (this.Subjects.length === 0
+                ? undefined
+                : this.Subjects[0][Property]);
+        }
+        else {
+            this.Subjects.forEach((Subject) => {
+                Subject[Property] = newValue;
+            });
+            return this;
+        }
+    }
+    /**** hasProp ****/
+    hasProp(Property) {
+        return (this.Subjects.length === 0
+            ? false
+            : Property in this.Subjects[0]);
+    }
+    /**** removeProp ****/
+    removeProp(Property) {
+        this.Subjects.forEach((Subject) => {
+            delete Subject[Property];
+        });
+        return this;
+    }
+    /**** data - not restricted to strings ****/
+    data(Key, newValue) {
+        if (newValue === undefined) {
+            return ((this.Subjects.length === 0) || (this.Subjects[0]['_data'] == null)
+                ? undefined
+                : this.Subjects[0]['_data'][Key]);
+        }
+        else {
+            this.Subjects.forEach((Subject) => {
+                if (Subject['_data'] == null) {
+                    Subject['_data'] = Object.create(null);
+                }
+                Subject['_data'][Key] = newValue;
+            });
+            return this;
+        }
+    }
+    /**** hasData ****/
+    hasData(Key) {
+        return ((this.Subjects.length > 0) &&
+            (this.Subjects[0]['_data'] != null) &&
+            (Key in this.Subjects[0]['_data']));
+    }
+    /**** removeData ****/
+    removeData(Key) {
+        this.Subjects.forEach((Subject) => {
+            if (Subject['_data'] != null) {
+                delete Subject['_data'][Key];
+            }
+        });
+        return this;
+    }
+    /**** attr ****/
+    attr(Attribute, newValue) {
+        if (newValue === undefined) {
+            if (this.Subjects.length === 0) {
+                return undefined;
+            }
+            let Value = this.Subjects[0].getAttribute(Attribute);
+            return (Value === null ? undefined : Value);
+        }
+        else {
+            if (newValue === null) {
+                return this.removeAttr(Attribute);
+            }
+            this.Subjects.forEach((Subject) => {
+                Subject.setAttribute(Attribute, newValue);
+            });
+            return this;
+        }
+    }
+    /**** hasAttr ****/
+    hasAttr(Attribute) {
+        return (this.Subjects.length === 0
+            ? false
+            : this.Subjects[0].hasAttribute(Attribute));
+    }
+    /**** removeAttr ****/
+    removeAttr(Attribute) {
+        this.Subjects.forEach((Subject) => {
+            Subject.removeAttribute(Attribute);
+        });
+        return this;
+    }
+    /**** val ****/
+    val(newValue) {
+        if (newValue === undefined) {
+            if (this.Subjects.length === 0) {
+                return undefined;
+            }
+            // @ts-ignore assume presence of "value" property
+            let Value = this.Subjects[0].value;
+            return (Value === null ? undefined : Value);
+        }
+        else {
+            this.Subjects.forEach((Subject) => {
+                // @ts-ignore assume presence of "value" property
+                Subject.value = newValue;
+            });
+            return this;
+        }
+    }
+    /**** css ****/
+    css(PropertyOrListOrSet, newValue) {
+        if (newValue === undefined) {
+            let computedStyles;
+            switch (true) {
+                case (typeof PropertyOrListOrSet === 'string'):
+                    if (this.Subjects.length === 0) {
+                        return undefined;
+                    }
+                    computedStyles = window.getComputedStyle(this.Subjects[0]);
+                    return computedStyles[CamelCased(PropertyOrListOrSet)];
+                case ValueIsArray(PropertyOrListOrSet):
+                    if (this.Subjects.length === 0) {
+                        return undefined;
+                    }
+                    computedStyles = window.getComputedStyle(this.Subjects[0]);
+                    let Result = {};
+                    PropertyOrListOrSet.forEach((Property) => {
+                        Result[Property] = computedStyles[CamelCased(Property)];
+                    });
+                    return Result;
+                default:
+                    if (this.Subjects.length === 0) {
+                        return this;
+                    }
+                    for (let Property in PropertyOrListOrSet) {
+                        if (PropertyOrListOrSet.hasOwnProperty(Property)) {
+                            newValue = PropertyOrListOrSet[Property];
+                            Property = CamelCased(Property);
+                            this.Subjects.forEach((Subject) => {
+                                if (Subject instanceof HTMLElement) {
+                                    Subject.style[Property] = newValue;
+                                }
+                            });
+                        }
+                    }
+                    return this;
+            }
+        }
+        else {
+            if (typeof PropertyOrListOrSet === 'string') {
+                let Property = CamelCased(PropertyOrListOrSet);
+                this.Subjects.forEach((Subject) => {
+                    if (Subject instanceof HTMLElement) {
+                        Subject.style[Property] = newValue;
+                    }
+                });
+                return this;
+            }
+            else {
+                throw new TypeError('single attribute name expected');
+            }
+        }
+    }
+    /**** html ****/
+    html(newValue) {
+        if (newValue === undefined) {
+            return (this.Subjects.length === 0
+                ? undefined
+                : this.Subjects[0].innerHTML);
+        }
+        else {
+            if (newValue === null) {
+                newValue = '';
+            }
+            this.Subjects.forEach((Subject) => {
+                Subject.innerHTML = newValue;
+            });
+            return this;
+        }
+    }
+    /**** text ****/
+    text(newValue) {
+        if (newValue === undefined) {
+            return ((this.Subjects.length === 0) || !(this.Subjects[0] instanceof HTMLElement)
+                ? undefined
+                : this.Subjects[0].innerText);
+        }
+        else {
+            if (newValue === null) {
+                newValue = '';
+            }
+            this.Subjects.forEach((Subject) => {
+                if (Subject instanceof HTMLElement) {
+                    Subject.innerText = newValue;
+                }
+            });
+            return this;
+        }
+    }
+    /**** appendText ****/
+    appendText(Value) {
+        this.Subjects.forEach((Subject) => {
+            Subject.insertAdjacentText('beforeend', Value);
+        });
+        return this;
+    }
+    /**** prependText ****/
+    prependText(Value) {
+        this.Subjects.forEach((Subject) => {
+            Subject.insertAdjacentText('afterbegin', Value);
+        });
+        return this;
+    }
+    /**** on ****/
+    on(Events, SelectorOrHandler, DataOrHandler, Handler) {
+        if (this.Subjects.length === 0) {
+            return this;
+        }
+        return this._registerEventHandler(Events, SelectorOrHandler, DataOrHandler, Handler);
+    }
+    /**** once ****/
+    once(Events, SelectorOrHandler, DataOrHandler, Handler) {
+        if (this.Subjects.length === 0) {
+            return this;
+        }
+        return this._registerEventHandler(Events, SelectorOrHandler, DataOrHandler, Handler, 'once');
+    }
+    /**** _registerEventHandler ****/
+    _registerEventHandler(Events, SelectorOrHandler, DataOrHandler, Handler, once) {
+        let ArgList = asArray(arguments).slice(1);
+        Events = Events.trim().replace(/\s+/g, ' ');
+        if (Events === '') {
+            return this;
+        }
+        let Selector = (ValueIsString(ArgList[0])
+            ? ArgList.shift().trim()
+            : (ArgList[0] == null ? ArgList.shift() || '' : '')); // '' means: no selector
+        let Data = (typeof ArgList[1] === 'function'
+            ? ArgList.shift()
+            : undefined);
+        Handler = ArgList.shift();
+        return this.__registerEventHandler(Events, Selector, Data, Handler, once);
+    }
+    /**** __registerEventHandler - on DOM element rather than DOMMaLi object ****/
+    __registerEventHandler(Events, Selector, Data, Handler, once) {
+        function actualHandler(Event) {
+            switch (Selector) {
+                case '':
+                    break;
+                case '@this':
+                    if (Event.target !== Event.currentTarget) {
+                        return;
+                    }
+                    break;
+                default:
+                    if (!Event.target.matches(Selector)) {
+                        return;
+                    }
+            }
+            if (Data != null) {
+                Event.data = Data;
+            }
+            if (once) {
+                (new _DOMMaLi(Event.currentTarget))._unregisterAllEventHandlersMatching(Event.type, Selector, Handler);
+            }
+            let ArgList = [Event].concat(Event['_extraParameters']);
+            if (Handler.apply(new _DOMMaLi(Event.currentTarget), ArgList) === false) {
+                Event.stopPropagation();
+                Event.preventDefault();
+            }
+        }
+        actualHandler['isFor'] = Handler;
+        let EventList;
+        if (ValueIsEventNameWithSelector(Events)) {
+            let AtIndex = Events.indexOf('@');
+            EventList = [Events.slice(0, AtIndex)];
+            Selector = Events.slice(AtIndex + 1);
+            if (Selector === 'this') {
+                Selector = '@this';
+            } // special case
+        }
+        else {
+            EventList = Events.split(' ');
+        }
+        EventList.forEach((Event) => {
+            this.Subjects.forEach((Subject) => {
+                let EventRegistry = Subject['_EventRegistry'];
+                if (EventRegistry == null) {
+                    EventRegistry = Subject['_EventRegistry'] = Object.create(null);
+                }
+                let EntriesForEvent = EventRegistry[Event];
+                if (EntriesForEvent == null) {
+                    EntriesForEvent = EventRegistry[Event] = Object.create(null);
+                }
+                let EntriesForSelector = EntriesForEvent[Selector];
+                if (EntriesForSelector == null) {
+                    EntriesForSelector = EntriesForEvent[Selector] = [];
+                }
+                EntriesForSelector.push(actualHandler);
+                Subject.addEventListener(Event, actualHandler);
+            });
+        });
+        return this;
+    }
+    /**** off ****/
+    off(Events, SelectorOrHandler, Handler) {
+        if (this.Subjects.length === 0) {
+            return this;
+        }
+        let ArgList = asArray(arguments).slice(1);
+        Events = (Events || '').trim().replace(/\s+/g, ' ');
+        if (Events === '') {
+            this._unregisterAllEventHandlersMatching();
+            return this;
+        }
+        let Selector = (ValueIsString(ArgList[0])
+            ? ArgList.shift().trim()
+            : (ArgList[0] === null ? ArgList.shift() || '' : undefined)); // "null" means: no selector, "undefined" means: any selector
+        Handler = ArgList.shift();
+        if (Handler == null) {
+            this._unregisterAllEventHandlersMatching(Events, Selector);
+            return this;
+        }
+        this._unregisterAllEventHandlersMatching(Events, Selector, Handler);
+        return this;
+    }
+    /**** _unregisterAllEventHandlersMatching ****/
+    _unregisterAllEventHandlersMatching(Events, Selector, Handler) {
+        let EventList;
+        if (ValueIsEventNameWithSelector(Events)) {
+            let AtIndex = Events.indexOf('@');
+            EventList = [Events.slice(0, AtIndex)];
+            Selector = Events.slice(AtIndex + 1);
+        }
+        else {
+            EventList = (Events == null ? [] : Events.split(' '));
+        }
+        this.Subjects.forEach((Subject) => {
+            let EventRegistry = Subject['_EventRegistry'];
+            if (EventRegistry == null) {
+                return;
+            }
+            if (EventList.length === 0) { // unregister any event handlers
+                for (let Event in EventRegistry) {
+                    this._unregisterHandlersForEventMatching(Subject, EventRegistry, Event, Selector, Handler);
+                }
+            }
+            else { // unregister handlers for the given events only
+                EventList.forEach((Event) => {
+                    this._unregisterHandlersForEventMatching(Subject, EventRegistry, Event, Selector, Handler);
+                });
+            }
+            if (ValueIsEmptyObject(EventRegistry)) {
+                delete Subject['_EventRegistry'];
+            }
+        });
+        return this;
+    }
+    /**** _unregisterHandlersForEventMatching ****/
+    _unregisterHandlersForEventMatching(Subject, EventRegistry, Event, Selector, Handler) {
+        let EntriesForEvent = EventRegistry[Event];
+        if (EntriesForEvent != null) {
+            if (Selector == null) {
+                for (let Selector in EntriesForEvent) {
+                    this._unregisterHandlersForEventSelectorsMatching(Subject, EntriesForEvent, Event, Selector, Handler);
+                }
+            }
+            else {
+                this._unregisterHandlersForEventSelectorsMatching(Subject, EntriesForEvent, Event, Selector, Handler);
+            }
+            if (ValueIsEmptyObject(EntriesForEvent)) {
+                delete EventRegistry[Event];
+            }
+        }
+    }
+    /**** _unregisterHandlersForEventSelectorsMatching ****/
+    _unregisterHandlersForEventSelectorsMatching(Subject, EntriesForEvent, Event, Selector, Handler) {
+        let EntriesForSelector = EntriesForEvent[Selector];
+        if (EntriesForSelector != null) {
+            if (Handler == null) {
+                EntriesForSelector.forEach((actualHandler) => {
+                    // @ts-ignore TypeScript does not allow JS functions here, but that's wrong
+                    Subject.removeEventListener(Event, actualHandler);
+                });
+                EntriesForSelector.length = 0;
+            }
+            else {
+                EntriesForSelector.every((actualHandler, Index) => {
+                    if (actualHandler['isFor'] === Handler) {
+                        // @ts-ignore TypeScript does not allow JS functions here, but that's wrong
+                        Subject.removeEventListener(Event, actualHandler);
+                        EntriesForSelector.splice(Index, 1);
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            if (EntriesForSelector.length === 0) {
+                delete EntriesForEvent[Selector];
+            }
+        }
+    }
+    /**** waitFor ****/
+    async waitFor(...EventsOrTimeout) {
+        let EventList = [];
+        let Timeout = -1;
+        if (EventsOrTimeout.length === 0) {
+            return 0;
+        }
+        EventsOrTimeout.forEach((EventOrTimeout) => {
+            switch (true) {
+                case ValueIsString(EventOrTimeout):
+                    EventList.push(EventOrTimeout);
+                    break;
+                case ValueIsNumber(EventOrTimeout):
+                    Timeout = Math.max(0, Math.round(EventOrTimeout));
+                    break;
+                default: throw new TypeError('event name (with opt. selector) or timeout expected');
+            }
+        });
+        if (!isFinite(Timeout)) {
+            Timeout = 0;
+        }
+        return new Promise((resolve, reject) => {
+            let Target = this;
+            let Timer;
+            let StartTime;
+            function cleanupFrom(Event) {
+                EventList.forEach((EventSpec) => Target.off(EventSpec, cleanupFrom));
+                if (Event == null) { // timeout occurred
+                    resolve(Date.now() - StartTime);
+                }
+                else { // event occurred before timeout
+                    clearTimeout(Timer);
+                    resolve(Event);
+                }
+            }
+            EventList.forEach((EventSpec) => Target.on(EventSpec, cleanupFrom));
+            if (Timeout >= 0) {
+                StartTime = Date.now();
+                Timer = setTimeout(cleanupFrom, Timeout);
+            }
+        });
+    }
+    /**** repeatUntil ****/
+    async repeatUntil(...EventsOrTimeoutOrLoopBody) {
+        let EventList = [];
+        let Timeout = -1;
+        let LoopBody;
+        EventsOrTimeoutOrLoopBody.forEach((Argument) => {
+            switch (true) {
+                case ValueIsString(Argument):
+                    EventList.push(Argument);
+                    break;
+                case ValueIsNumber(Argument):
+                    Timeout = Math.max(0, Math.round(Argument));
+                    break;
+                case ValueIsFunction(Argument):
+                    LoopBody = Argument;
+                    break;
+                default: throw new TypeError('event name (with opt. selector) or timeout or loop body expected');
+            }
+        });
+        // @ts-ignore: TypeScript bug? the thrown compiler error is rubbish
+        if (LoopBody == null) {
+            throw new TypeError('no loop body function given');
+        }
+        if (!isFinite(Timeout)) {
+            Timeout = 0;
+        }
+        return new Promise(async (resolve, reject) => {
+            let Target = this;
+            let Result = undefined;
+            let Timer;
+            let StartTime;
+            function processEventOrTimeout(Event) {
+                EventList.forEach((EventSpec) => Target.off(EventSpec, processEventOrTimeout));
+                if (Event === undefined) { // timeout occurred
+                    Result = Date.now() - StartTime;
+                }
+                else { // event occurred before timeout
+                    clearTimeout(Timer);
+                    Result = Event;
+                }
+            }
+            EventList.forEach((EventSpec) => Target.on(EventSpec, processEventOrTimeout));
+            if (Timeout >= 0) {
+                StartTime = Date.now();
+                Timer = setTimeout(processEventOrTimeout, Timeout);
+            }
+            try {
+                do {
+                    let LoopResult = await LoopBody();
+                    if (LoopResult !== undefined) {
+                        Result = LoopResult;
+                    } // "break"
+                } while (Result === undefined);
+                resolve(Result);
+            }
+            catch (Signal) {
+                processEventOrTimeout(null);
+                reject(Signal);
+            }
+        });
+    }
+    /**** HandlersForEvent ****/
+    HandlersForEvent(Event) {
+        let Result = [];
+        Event = Event.trim().replace(/\s+/g, ' ');
+        if (Event === '') {
+            throw new TypeError('no "Event" given');
+        }
+        if (/\s/.test(Event)) {
+            throw new TypeError('multiple "Events" given');
+        }
+        let Subject = this.Subjects[0];
+        if (Subject == null) {
+            return Result;
+        }
+        let EventRegistry = Subject['_EventRegistry'];
+        if (EventRegistry == null) {
+            return Result;
+        }
+        let EntriesForEvent = EventRegistry[Event];
+        if (EntriesForEvent == null) {
+            return Result;
+        }
+        for (let Selector in EntriesForEvent) {
+            Result = Result.concat(EntriesForEvent[Selector]);
+        }
+        return Result;
+    }
+    /**** trigger ****/
+    trigger(Event, extraParameters, bubbles = true) {
+        if (this.Subjects.length === 0) {
+            return true;
+        }
+        if (ValueIsString(Event)) {
+            Event = new CustomEvent(Event, { bubbles, cancelable: true });
+        }
+        if (extraParameters != null) {
+            Event['_extraParameters'] = (ValueIsArray(extraParameters)
+                ? extraParameters.slice()
+                : [extraParameters]);
+        }
+        return this.Subjects.reduce((Result, Subject) => {
+            return Subject.dispatchEvent(Event) && Result;
+        }, true);
+    }
+    /**** focus ****/
+    focus() {
+        if ((this.Subjects.length > 0) && (this.Subjects[0] instanceof HTMLElement)) {
+            this.Subjects[0].focus();
+        }
+        return this;
+    }
+    /**** blur ****/
+    blur() {
+        if ((this.Subjects.length > 0) && (this.Subjects[0] instanceof HTMLElement)) {
+            this.Subjects[0].blur();
+        }
+        return this;
+    }
+    /**** hasFocus ****/
+    hasFocus() {
+        return (document.activeElement === this.Subjects[0]);
+    }
+    /**** focusedElement ****/
+    focusedElement() {
+        return new _DOMMaLi(document.activeElement);
+    }
+    /**** transition ****/
+    transition(Settings, Options) {
+        if (this.Subjects.length === 0) {
+            return this;
+        }
+        if (ValueIsEmptyObject(Settings)) {
+            return this;
+        }
+        Options = Object.assign({}, {
+            delay: '0ms', duration: '400ms', easing: 'linear',
+            cleanup: true
+        }, Options);
+        let TransitProps = '';
+        for (let Key in Settings) {
+            if (Settings.hasOwnProperty(Key)) {
+                TransitProps += (TransitProps === '' ? '' : ',') + Key;
+            }
+        }
+        let TransitDuration = (ValueIsString(Options.duration) ? Options.duration : (Options.duration + 'ms'));
+        let TransitDelay = (ValueIsString(Options.delay) ? Options.delay : (Options.delay + 'ms'));
+        if (Options.cleanup == true) {
+            this.Subjects.forEach((Subject) => {
+                if (Subject instanceof HTMLElement) {
+                    let previousTransition = window.getComputedStyle(Subject).transition;
+                    Subject.addEventListener('transitionend', (Event) => {
+                        Subject.style.transition = previousTransition;
+                    }, { once: true });
+                }
+            });
+        }
+        this.Subjects.forEach((Subject) => {
+            if (Subject instanceof HTMLElement) {
+                Subject.style.transitionProperty = TransitProps;
+                Subject.style.transitionDelay = TransitDelay;
+                Subject.style.transitionDuration = TransitDuration;
+                // @ts-ignore no, "Options" is never undefined
+                Subject.style.transitionTimingFunction = Options.easing;
+                for (let Key in Settings) {
+                    if (Settings.hasOwnProperty(Key)) {
+                        let newValue = Settings[Key];
+                        let Property = CamelCased(Key);
+                        Subject.style[Property] = newValue;
+                    }
+                }
+            }
+        });
+        return this;
+    }
+}
+/**** textWidth ****/
+DOMMaLi._relevantSettings_for_textWidth = [
+    'font-family', 'font-size', 'font-weight', 'font-style', 'font-variant',
+    'font-variant-caps', 'font-variant-numeric', 'font-variant-alternates',
+    'font-variant-ligatures', 'font-variant-east-asian', 'font-stretch',
+    'font-kerning', 'font-size-adjust', 'font-synthesis', 'font-language-override',
+    'white-space', 'letter-spacing', 'word-spacing', 'text-indent',
+    'text-transform'
+];
+/**** textHeight ****/
+DOMMaLi._relevantSettings_for_textHeight = [
+    'font-family', 'font-size', 'font-weight', 'font-style', 'font-variant',
+    'font-variant-caps', 'font-variant-numeric', 'font-variant-alternates',
+    'font-variant-ligatures', 'font-variant-east-asian', 'font-stretch',
+    'font-kerning', 'font-size-adjust', 'font-synthesis', 'font-language-override',
+    'white-space', 'letter-spacing', 'word-spacing', 'text-indent',
+    'text-transform', 'word-break', 'line-break', 'line-height',
+    'width' // width may be explicitly specified
+];
+/**** apply any synonyms ****/
+Object.assign(DOMMaLi.prototype, {
+    renderPositionInViewport: DOMMaLi.prototype.positionInViewport,
+    layoutPositionInParent: DOMMaLi.prototype.positionInParent,
+    layoutPositionOnPage: DOMMaLi.prototype.positionOnPage,
+    layoutWidth: DOMMaLi.prototype.width,
+    layoutHeight: DOMMaLi.prototype.height,
+    outerWidth: DOMMaLi.prototype.width,
+    outerHeight: DOMMaLi.prototype.height,
+});
+/**** startup function handling ****/
+let DOMisReady = (document.readyState !== 'loading');
+if (!DOMisReady) {
+    window.addEventListener('DOMContentLoaded', () => {
+        DOMisReady = true;
+        invokeAllReadyFunctionsToCall();
+    });
+}
+/**** invokeAllReadyFunctionsToCall ****/
+// ReadyFunctionsToCall may be extended while invokeAllReadyFunctionsToCall is running!
+const ReadyFunctionsToCall = [];
+let ReadyFunctionsAreRunning = false;
+function invokeAllReadyFunctionsToCall() {
+    ReadyFunctionsAreRunning = true;
+    for (let i = 0; i < ReadyFunctionsToCall.length; i++) {
+        try {
+            ReadyFunctionsToCall[i]();
+        }
+        catch (signal) {
+            console.error('registered dommali "ready" handler failed with ', signal);
+        }
+    }
+    ReadyFunctionsAreRunning = false;
+}
+class _DOMMaLi extends DOMMaLi {
+    constructor(Value) {
+        super();
+        switch (true) {
+            case (Value == null):
+                this.Subjects = [];
+                break;
+            case ValueIsArray(Value):
+                this.Subjects = Value; // important: array REFERENCE!
+                break;
+            case ValueIsString(Value):
+                if (Value.startsWith('<')) {
+                    const Template = document.createElement('template');
+                    Template.innerHTML = Value;
+                    this.Subjects = asArray(Template.content.children);
+                }
+                else {
+                    this.Subjects = asArray(document.querySelectorAll(unhashed(Value)));
+                }
+                break;
+            case (Value instanceof _DOMMaLi):
+                this.Subjects = Value.Subjects.slice();
+                break;
+            case (Value instanceof Element):
+                this.Subjects = [Value];
+                break;
+            default:
+                throw new TypeError('unsupported "dommali" constructor argument');
+        }
+    }
+}
+function dommali(Value) {
+    switch (true) {
+        case (typeof Value === 'function'):
+            return DOMMaLi.ready(Value);
+        case ValueIsArray(Value):
+            return new _DOMMaLi(asArray(Value));
+        default:
+            return new _DOMMaLi(Value);
+    }
+}
+exports.default = dommali;
+Object.assign(dommali, {
+    ready: DOMMaLi.ready,
+    textWidth: DOMMaLi.textWidth, textHeight: DOMMaLi.textHeight,
+    extraParametersOfEvent: DOMMaLi.extraParametersOfEvent
+});
+/**** always also provide DOMMaLi as a global ****/
+let global = (new Function('return this'))();
+global.dommali = dommali;
+
+  })(exports)
+
+  let global = (new Function('return this'))()
+  global.dommali = exports.default
+})()
+ </script>
+
+
+ </head>
+ <body>
+
+  <table style="
+    width:600px; min-height:400px; height:100%;
+    padding:8px; margin:0px auto;
+    border:solid 1px black; border-radius:8px;
+    background:white; color:black;
+  "><tbody>
+    <tr>
+      <td colspan="5" style="padding-bottom:4px"><span style="
+        font-size:22px; font-weight:bold;
+      ">LLaMA</span></td>
+    </tr>
+    <tr>
+      <td>Base URL:</td>
+      <td colspan="4">
+        <input id="BaseURLInput" type="text" value="" placeholder=""
+          style="width:100%">
+      </td>
+    </tr>
+    <tr>
+      <td>User Name:</td>
+      <td><input id="UserNameInput" type="text"     value=""></td>
+     <td><span style="width:20px">&nbsp;</span></td>
+      <td>Password:</td>
+      <td><input id="PasswordInput" type="password" value=""></td>
+    </tr>
+    <tr>
+      <td>Seed:</td>
+      <td><input id="SeedInput"        type="number" value="" placeholder="-1"
+        step="1"></td>
+     <td><span style="width:20px">&nbsp;</span></td>
+      <td>Temperature:</td>
+      <td><input id="TemperatureInput" type="number" value="" placeholder="0.8"
+        min="0" max="1" step="0.01"></td>
+    </tr>
+    <tr>
+      <td>Prediction Length:</td>
+      <td><input id="PredictionInput" type="number" value="" placeholder="128"
+        min="-1" step="1"></td>
+     <td><span style="width:20px">&nbsp;</span></td>
+      <td>Context Length:</td>
+      <td><input id="ContextInput"    type="number" value="" placeholder="512"
+        min="0" max="10000" step="1"></td>
+    </tr>
+    <tr>
+      <td>top K pick:</td>
+      <td><input id="TopKInput" type="number" value="" placeholder="40"
+        min="1" max="100" step="1"></td>
+     <td><span style="width:20px">&nbsp;</span></td>
+      <td>top P pick:</td>
+      <td><input id="TopPInput" type="number" value="" placeholder="0.9"
+        min="0.1" max="1.0" step="0.01"></td>
+    </tr>
+    <tr style="height:100%">
+      <td colspan="5" style="position:relative">
+        <textarea id="ChatLog" style="
+          position:absolute;
+          top:0px; bottom:0px; width:100%;
+          margin-top:8px;
+          resize:none;
+        "></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="5">
+        <input id="PromptInput" type="text" style="
+          width:93%; height:32px;
+        ">
+        <button id="SubmitButton" disabled style="
+          position:relative; top:2px; width:36px; height:32px;
+        "><span style="
+          font-size:22px; font-weight:bold;
+          transform:rotateZ(45deg);
+        ">➢</span></button>
+      </td>
+    </tr>
+  </tbody></table>
+
+  <style>
+    :disabled { opacity:0.5 }
+  </style>
+
+  <script>
+    const $ = dommali
+    $(() => {
+      $('#BaseURLInput').prop('placeholder',window.location.origin)
+
+      $('#PromptInput').on('input',() => {
+        if ($('#PromptInput').prop('value').trim() === '') {
+          $('#SubmitButton').attr('disabled','disabled')
+        } else {
+          $('#SubmitButton').removeAttr('disabled')
+        }
+      })
+      $('#SubmitButton').on('click',() => {
+        let ChatLogValue = $('#ChatLog').prop('value')
+        if (ChatLogValue !== '') { ChatLogValue += '\n\n' }
+
+        let Prompt = $('#PromptInput').prop('value').trim()
+        if (Prompt === '') {
+          $('#ChatLog').prop('value',ChatLogValue + '>>>> no prompt given')
+        } else {
+          $('#ChatLog').prop('value',ChatLogValue + Prompt + '\n\n(waiting for response)')
+
+          let Seed        = ($('#SeedInput').prop('value') || '').trim()
+          let Temperature = ($('#TemperatureInput').prop('value') || '').trim()
+          let Prediction  = ($('#PredictionInput').prop('value') || '').trim()
+          let Context     = ($('#ContextInput').prop('value') || '').trim()
+          let topK        = ($('#TopKInput').prop('value') || '').trim()
+          let topP        = ($('#TopPInput').prop('value') || '').trim()
+
+          try {
+            const Request = new XMLHttpRequest()
+              Request.addEventListener('load', () => {
+                if (Request.status === 200) {
+                  $('#ChatLog').prop('value',ChatLogValue + Request.responseText)
+                } else {
+                  $('#ChatLog').prop('value',ChatLogValue + Prompt + '\n\n>>>> ' + Request.responseText)
+                }
+              })
+
+              let BaseURL = $('#BaseURLInput').prop('value').trim()
+              if (BaseURL === '') { BaseURL = window.location.origin }
+
+              Request.open(
+                'GET',
+                BaseURL + '/llama?prompt=' + encodeURIComponent(Prompt) +
+                (Seed        !== '' ? '&seed='        + Seed        : '') +
+                (Temperature !== '' ? '&temperature=' + Temperature : '') +
+                (Prediction  !== '' ? '&predict='     + Prediction  : '') +
+                (Context     !== '' ? '&context='     + Context     : '') +
+                (topK        !== '' ? '&topk='        + topK        : '') +
+                (topP        !== '' ? '&topp='        + topP        : '')
+              )
+
+              let UserName = $('#UserNameInput').prop('value').trim()
+              let Password = $('#PasswordInput').prop('value').trim()
+              if ((UserName !== '') && (Password !== '')) {
+                Request.setRequestHeader(
+                  'Authorization', 'Basic ' + btoa(UserName + ':' + Password)
+                )
+              }
+            Request.send()
+          } catch (Signal) {
+            $('#ChatLog').prop('value',ChatLogValue + Prompt + '\n\n>>>> ' + Signal)
+          }
+        }
+      })
+    })
+  </script>
+ </body>
+</html>
+
