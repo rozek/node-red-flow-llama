@@ -31,18 +31,18 @@ All properties (except the prompt itself) are optional. If given, they should be
 
 ## Example ##
 
-The file [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json) contains an example which uses the LLaMA function node to answer HTTP requests. The prompt itself and any inference parameters have to be passed as query parameters. The following parameters are supported
+The file [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json) contains an example which uses the LLaMA function node to answer HTTP requests. The prompt itself and any inference parameters have to be passed as query parameters. The following parameters are supported (most of them will be copied into a `msg` property of the same name):
 
-* prompt
-* seed
-* threads
-* context
-* keep
-* predict
-* topk
-* topp
-* temperature
-* batches
+* `prompt` - will be copied into `msg.payload`
+* `seed` - will be copied into `msg.seed`
+* `threads` - will be copied into `msg.threads`
+* `context` - will be copied into `msg.context`
+* `keep` - will be copied into `msg.keep`
+* `predict` - will be copied into `msg.predict`
+* `topk` - will be copied into `msg.topk`
+* `topp` - will be copied into `msg.topp`
+* `temperature` - will be copied into `msg.temperature`
+* `batches` - will be copied into `msg.batches`
 
 ## License ##
 
