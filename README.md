@@ -10,7 +10,19 @@ Having the actual inference as a self-contained function node gives you the poss
 
 ## Installation ##
 
+The actual "heavy lifting" is done by [llama.cpp](https://github.com/ggerganov/llama.cpp). Simply follow the instructions found in section [Usage](https://github.com/ggerganov/llama.cpp#usage) to build the CLI command `main` for your platform.
+
+Afterwards, rename `main` to `llama` and copy it into a subfolder called `ai` within the installation folder of your Node-RED server
+
 ### Preparing the Model ###
+
+Once you got the actual LLaMA model, follow the instructions found in section [Prepare Data & Run](https://github.com/ggerganov/llama.cpp#prepare-data--run) to bring it into the proper format.
+
+Afterwards, rename the file `ggml-model-q4_0.bin` to `ggml-llama-7b-q4.bin` and move (or copy) it into the same subfolder `ai` within the installation folder of your Node-RED server where you already placed the `llama` executable.
+
+### Importing the Function Node ###
+
+Finally, open the Flow Editor of your Node-RED server and import the contents of [LLaMA-Function.json](./LLaMA-Function.json). After deploying your changes, you are ready to run LLaMA inferences directly from within Node-RED.
 
 ## Usage ##
 
