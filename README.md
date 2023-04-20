@@ -14,7 +14,9 @@ Having the actual inference as a self-contained function node gives you the poss
 
 ## Usage ##
 
-The prompt itself and any inference parameters have to be passed as properties of the msg object. The following properties are supported:
+The prompt itself and any inference parameters have to be passed as properties of the msg object. The prompt is expected in `msg.payload` and will later be replaced by the result of the inference.
+
+The following properties are supported:
 
 * `payload` - this is the actual prompt 
 * `seed` - 
