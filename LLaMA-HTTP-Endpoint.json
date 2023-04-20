@@ -1,0 +1,268 @@
+[
+    {
+        "id": "61c98da67098491c",
+        "type": "comment",
+        "z": "50ed45470ea01d88",
+        "name": "LLaMA",
+        "info": "",
+        "x": 730,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "312187206f05e4d5",
+        "type": "http in",
+        "z": "50ed45470ea01d88",
+        "name": "",
+        "url": "llama",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 740,
+        "y": 700,
+        "wires": [
+            [
+                "8c556d0df5688e61"
+            ]
+        ]
+    },
+    {
+        "id": "369aa83f860d0a67",
+        "type": "function",
+        "z": "50ed45470ea01d88",
+        "name": "LLaMA",
+        "func": "(async () => {\n  let Prompt = (msg.payload || '').trim()\n  if (Prompt === '') {\n    msg.payload = 'empty or missing prompt'\n    node.send([null,msg])\n    return\n  }\n  \n/**** retrieve settings or provide defaults ****/\n\n  let Seed = parseInt(msg.seed,10)\n  if (isNaN(Seed)) { Seed = -1 }\n  \n  let Threads = parseInt(msg.threads,10)\n  if (isNaN(Threads)) { Threads = 4 }\n  Threads = Math.max(1,Threads)\n  Threads = Math.min(Threads,Math.max(1,os.cpus().length))\n\n  let Context = parseInt(msg.context,10)\n  if (isNaN(Context)) { Context = 512 }\n  Context = Math.max(0,Math.min(Context,10000))\n\n  let keep = parseInt(msg.keep,10)\n  if (isNaN(keep)) { keep = 0 }\n  keep = Math.max(-1,Math.min(keep,10000))\n\n  let Prediction = parseInt(msg.predict,10)\n  if (isNaN(Prediction)) { Prediction = 128 }\n  Prediction = Math.max(1,Math.min(Prediction,10000)) // no -1!\n\n  let topK = parseInt(msg.topk,10)\n  if (isNaN(topK)) { topK = 40 }\n  topK = Math.max(1,Math.min(topK,100))\n\n  let topP = parseFloat(msg.topp)\n  if (isNaN(topP)) { topP = 0.9 }\n  topP = Math.max(0.1,Math.min(topP,1.0))\n\n  let Temperature = parseFloat(msg.temperature)\n  if (isNaN(Temperature)) { Temperature = 0.8 }\n  Temperature = Math.max(0.0,Math.min(Temperature,1.0))\n\n  let Batches = parseInt(msg.batches,10)\n  if (isNaN(Batches)) { Batches = 8 }\n  Batches = Math.max(1,Math.min(Batches,100))\n\n  Prompt = Prompt.replace(/\"/g,'\\\\\"')\n\n/**** combine all these settings into a command ****/\n\n  let Command = ( 'cd ai && ' +\n    './llama --model ././ggml-llama-7b-q4.bin --mlock ' +\n    ' --ctx_size ' + Context + ' --keep ' + keep +\n    ' --n_predict ' + Prediction + \n    ' --threads ' + Threads + ' --batch_size ' + Batches +\n    ' --seed ' + Seed + ' --temp ' + Temperature +\n    ' --top_k ' + topK + ' --top_p ' + topP +\n    ' --reverse-prompt \"<|endoftext|>\"' +     // experimental\n    ' --prompt \"' + Prompt + '\"'\n  )\n\n/**** extract actual reponse from command output ****/\n\n  function ResponseFrom (Text) {\n    let HeaderLength = Text.indexOf('\\n\\n\\n')\n    Text = Text.slice(HeaderLength + 1)\n\n    let TrailerIndex = Text.indexOf('<|endoftext|>')\n    if (TrailerIndex < 0) {\n      TrailerIndex = Text.indexOf('\\nllama_print_timings')\n    }\n    Text = Text.slice(0,TrailerIndex)\n\n    return Text\n  }\n\n/**** now infer a response from the given prompt ****/\n  \n  let { stdout,stderr, StatusCode,Signal } = child_process.spawnSync(\n    'bash', [], { input:Command }\n  )\n  \n  stdout = stdout.toString().trim()\n  stderr = stderr.toString().trim()\n\n  switch (true) {\n    case (StatusCode == null):\n    case (StatusCode === 0):\n      msg.statusCode = (stdout === '' ? 204 : 200)\n      msg.payload    = ResponseFrom(stdout)\n      break\n    default:\n      msg.statusCode = 500 + StatusCode\n      msg.payload    = (stdout === '' ? '' : '>>>> stdout >>>>\\n' + stdout + '\\n') +\n                       '>>>> stderr >>>>\\n' + stderr +\n                       (Signal == null ? '' : '\\n' + Signal)\n      break\n  }\n\n  node.send([msg,null])\n})()\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "os",
+                "module": "os"
+            },
+            {
+                "var": "child_process",
+                "module": "child_process"
+            }
+        ],
+        "x": 960,
+        "y": 760,
+        "wires": [
+            [
+                "0b67ec03e21a695e",
+                "dde286166cd27570"
+            ],
+            [
+                "969b07fc3fb80545"
+            ]
+        ]
+    },
+    {
+        "id": "19992ff803d41b59",
+        "type": "debug",
+        "z": "50ed45470ea01d88",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "'Prompt: \"' & msg.payload & '\"'",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "c0390111b4fe8450",
+        "type": "http response",
+        "z": "50ed45470ea01d88",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1190,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "969b07fc3fb80545",
+        "type": "change",
+        "z": "50ed45470ea01d88",
+        "name": "400",
+        "rules": [
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "400",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1170,
+        "y": 800,
+        "wires": [
+            [
+                "c0390111b4fe8450"
+            ]
+        ]
+    },
+    {
+        "id": "0b67ec03e21a695e",
+        "type": "change",
+        "z": "50ed45470ea01d88",
+        "name": "200",
+        "rules": [
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "200",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1170,
+        "y": 760,
+        "wires": [
+            [
+                "c0390111b4fe8450"
+            ]
+        ]
+    },
+    {
+        "id": "dde286166cd27570",
+        "type": "debug",
+        "z": "50ed45470ea01d88",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "'Response: \"' & msg.payload & '\"'",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "67bf0de8cbb057c2",
+        "type": "comment",
+        "z": "50ed45470ea01d88",
+        "name": "cwd = server installation folder",
+        "info": "",
+        "x": 1110,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "8c556d0df5688e61",
+        "type": "change",
+        "z": "50ed45470ea01d88",
+        "name": "parse query",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "req.query.prompt",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "seed",
+                "pt": "msg",
+                "to": "req.query.seed",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "threads",
+                "pt": "msg",
+                "to": "req.query.threads",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "predict",
+                "pt": "msg",
+                "to": "req.query.predict",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topk",
+                "pt": "msg",
+                "to": "req.query.topk",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topp",
+                "pt": "msg",
+                "to": "req.query.topp",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "temperature",
+                "pt": "msg",
+                "to": "req.query.temperature",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "batches",
+                "pt": "msg",
+                "to": "req.query.batches",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "model",
+                "pt": "msg",
+                "to": "req.query.model",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "msg",
+                "to": "req.query.context",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "keep",
+                "pt": "msg",
+                "to": "req.query.keep",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 790,
+        "y": 760,
+        "wires": [
+            [
+                "369aa83f860d0a67",
+                "19992ff803d41b59"
+            ]
+        ]
+    }
+]
