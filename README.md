@@ -22,6 +22,8 @@ Afterwards, rename `main` to `llama` and copy it into the subfolder `ai` you cre
 
 Once you got the actual LLaMA model, follow the instructions found in section [Prepare Data & Run](https://github.com/ggerganov/llama.cpp#prepare-data--run) of the llama.cpp docs to bring it into the proper format.
 
+> Nota bene: right now, the function node supports the 7B model only - but this may easily be changed in the function source
+
 Afterwards, rename the file `ggml-model-q4_0.bin` to `ggml-llama-7b-q4.bin` and move (or copy) it into the same subfolder `ai` where you already placed the `llama` executable.
 
 ### Importing the Function Node ###
