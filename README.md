@@ -84,6 +84,12 @@ Ideally, this page should be served from the same Node-RED server that also acce
 
 The input fields `Base URL`, `User Name` and `Password` can be used if web server and Node-RED server are at different locations: just enter the base URL of your Node-RED HTTP endpoint (without the trailing `llama`) and, if that server requires basic authentication, your user name and your password in the related input fields before you send your first prompt - otherwise, just leave all these fields empty.
 
+The input fields `Seed`, `Temperature`, `Prediction Length`, `Context Length`, `top K pick` and `top P pick` may be used to customize some of the parameters described above - if left empty, their "placeholders" show the respective default values.
+
+The largest field will show a transcript of your current dialog with the inference node.
+
+Finally, the bottommost input field may be used to enter a prompt - if one is present, the "Send" button becomes enabled: press it to submit your prompt, then wait for a response.
+
 > Nota bene: **inference is still done on the Node-RED server**, not within your browser!
 
 ## License ##
