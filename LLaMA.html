@@ -1559,14 +1559,18 @@ global.dommali = dommali;
         }
       })
       $('#SubmitButton').on('click',() => {
-        let ChatLogValue = $('#ChatLog').prop('value')
+        let ChatLog = $('#ChatLog').subject(0)
+
+        let ChatLogValue = ChatLog.value
         if (ChatLogValue !== '') { ChatLogValue += '\n\n' }
 
         let Prompt = $('#PromptInput').prop('value').trim()
         if (Prompt === '') {
-          $('#ChatLog').prop('value',ChatLogValue + '>>>> no prompt given')
+          ChatLog.value = ChatLogValue + '>>>> no prompt given'
+          ChatLog.scrollTop = ChatLog.scrollHeight
         } else {
-          $('#ChatLog').prop('value',ChatLogValue + Prompt + '\n\n(waiting for response)')
+          ChatLog.value = ChatLogValue + Prompt + '\n\n(waiting for response)'
+          ChatLog.scrollTop = ChatLog.scrollHeight
 
           let Seed        = ($('#SeedInput').prop('value') || '').trim()
           let Temperature = ($('#TemperatureInput').prop('value') || '').trim()
@@ -1579,10 +1583,11 @@ global.dommali = dommali;
             const Request = new XMLHttpRequest()
               Request.addEventListener('load', () => {
                 if (Request.status === 200) {
-                  $('#ChatLog').prop('value',ChatLogValue + Request.responseText)
+                  ChatLog.value = ChatLogValue + Request.responseText
                 } else {
-                  $('#ChatLog').prop('value',ChatLogValue + Prompt + '\n\n>>>> ' + Request.responseText)
+                  ChatLog.value = ChatLogValue + Prompt + '\n\n>>>> ' + Request.responseText
                 }
+                ChatLog.scrollTop = ChatLog.scrollHeight
               })
 
               let BaseURL = $('#BaseURLInput').prop('value').trim()
@@ -1608,7 +1613,8 @@ global.dommali = dommali;
               }
             Request.send()
           } catch (Signal) {
-            $('#ChatLog').prop('value',ChatLogValue + Prompt + '\n\n>>>> ' + Signal)
+            ChatLog.value = ChatLogValue + Prompt + '\n\n>>>> ' + Signal
+            ChatLog.scrollTop = ChatLog.scrollHeight
           }
         }
       })
