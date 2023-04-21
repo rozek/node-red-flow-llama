@@ -76,9 +76,13 @@ In order to install this flow, simply open the Flow Editor of your Node-RED serv
 
 ### Web Page ###
 
-The file [LLaMA.html](./LLaMA.html) contains a trivial web page which can act as a user interface for the HTTP endpoint. Ideally, this page should be served from the same Node-RED server that also accepts the HTTP requests for LLaMA, but this is not strictly necessary.
+The file [LLaMA.html](./LLaMA.html) contains a trivial web page which can act as a user interface for the HTTP endpoint.
 
 ![LLaMA Screenshot](./LLaMA-Screenshot.png)
+
+Ideally, this page should be served from the same Node-RED server that also accepts the HTTP requests for LLaMA, but this is not strictly necessary.
+
+The input fields `Base URL`, `User Name` and `Password` can be used if web server and Node-RED server are at different locations: just enter the base URL of your Node-RED HTTP endpoint (without the trailing `llama`) and, if that server requires basic authentication, your user name and your password in the related input fields before you send your first prompt - otherwise, just leave all these fields empty.
 
 > Nota bene: **inference is still done on the Node-RED server**, not within your browser!
 
