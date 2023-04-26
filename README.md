@@ -12,7 +12,8 @@ Having the actual inference as a self-contained function node gives you the poss
 
 If you like, you may also check out similar nodes and flows for other AI models as there are
 
-* [Stanford Alpaca](https://github.com/rozek/node-red-flow-alpaca)
+* [Stanford Alpaca, trained with GPT-3](https://github.com/rozek/node-red-flow-alpaca)
+* [Stanford Alpaca, trained with GPT-4](https://github.com/rozek/node-red-flow-gpt4-x-alpaca)
 * [Nomic AI GPT4All (filtered version)](https://github.com/rozek/node-red-flow-gpt4all-filtered)
 * [Nomic AI GPT4All (unfiltered version)](https://github.com/rozek/node-red-flow-gpt4all-unfiltered)
 * [Nomic AI GPT4All-J](https://github.com/rozek/node-red-flow-gpt4all-j)
