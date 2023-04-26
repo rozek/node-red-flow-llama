@@ -12,7 +12,8 @@ Having the actual inference as a self-contained function node gives you the poss
 
 If you like, you may also check out similar nodes and flows for other AI models as there are
 
-* [Stanford Alpaca](https://github.com/rozek/node-red-flow-alpaca)
+* [Stanford Alpaca, trained with GPT-3](https://github.com/rozek/node-red-flow-alpaca)
+* [Stanford Alpaca, trained with GPT-4](https://github.com/rozek/node-red-flow-gpt4-x-alpaca)
 * [Nomic AI GPT4All (filtered version)](https://github.com/rozek/node-red-flow-gpt4all-filtered)
 * [Nomic AI GPT4All (unfiltered version)](https://github.com/rozek/node-red-flow-gpt4all-unfiltered)
 * [Nomic AI GPT4All-J](https://github.com/rozek/node-red-flow-gpt4all-j)
@@ -51,7 +52,7 @@ The following properties are supported:
 * `payload` - this is the actual prompt 
 * `seed` - seed value for the internal pseudo random number generator (integer, default: -1, use random seed for <= 0)
 * `threads` - number of threads to use during computation (integer ≧ 1, default: 4)
-* `context` - size of the prompt context (integer ≧ 0, default: 512)
+* `context` - size of the prompt context (0...2048, default: 512)
 * `keep` - number of tokens to keep from the initial prompt (integer ≧ -1, default: 0, -1 = all)
 * `predict` - number of tokens to predict (integer ≧ -1, default: 128, -1 = infinity)
 * `topk` - top-k sampling limit (integer ≧ 1, default: 40)
