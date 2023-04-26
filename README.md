@@ -52,7 +52,7 @@ The following properties are supported:
 * `payload` - this is the actual prompt 
 * `seed` - seed value for the internal pseudo random number generator (integer, default: -1, use random seed for <= 0)
 * `threads` - number of threads to use during computation (integer ≧ 1, default: 4)
-* `context` - size of the prompt context (integer ≧ 0, default: 512)
+* `context` - size of the prompt context (0...2048, default: 512)
 * `keep` - number of tokens to keep from the initial prompt (integer ≧ -1, default: 0, -1 = all)
 * `predict` - number of tokens to predict (integer ≧ -1, default: 128, -1 = infinity)
 * `topk` - top-k sampling limit (integer ≧ 1, default: 40)
