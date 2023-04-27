@@ -1,0 +1,34 @@
+[
+    {
+        "id": "684ad9a881dc869d",
+        "type": "function",
+        "z": "50ed45470ea01d88",
+        "name": "LLaMA Embeddings",
+        "func": "(async () => {\n  let Prompt = (msg.payload || '').trim()\n  if (Prompt === '') {\n    msg.payload = 'empty or missing prompt'\n    node.send([null,msg])\n    return\n  }\n  \n/**** retrieve settings or provide defaults ****/\n\n  let Seed = parseInt(msg.seed,10)\n  if (isNaN(Seed)) { Seed = -1 }\n  \n  let Threads = parseInt(msg.threads,10)\n  if (isNaN(Threads)) { Threads = 4 }\n  Threads = Math.max(1,Threads)\n  Threads = Math.min(Threads,Math.max(1,os.cpus().length))\n\n  let Context = parseInt(msg.context,10)\n  if (isNaN(Context)) { Context = 512 }\n  Context = Math.max(0,Math.min(Context,2048))\n\n  Prompt = Prompt.replace(/\"/g,'\\\\\"')\n\n/**** combine all these settings into a command ****/\n\n  let Command = ( 'cd ai && ' +\n    './llama-embeddings --model ./ggml-llama-7b-q4.bin --mlock ' +\n    ' --ctx_size ' + Context + \n    ' --threads ' + Threads +\n    ' --seed ' + Seed +\n    ' --prompt \"' + Prompt + '\"'\n  )\n\n/**** extract actual reponse from command output ****/\n\n  function ResponseFrom (Text) {\n    let HeaderLength = Text.indexOf('system_info')\n    Text = Text.slice(HeaderLength + 1)\n      .replace(/^[^\\n]*\\n/,'')\n\n    let TrailerIndex = Text.indexOf('\\n\\nllama_print_timings')\n    Text = Text.slice(0,TrailerIndex)\n\n    return Text\n  }\n\n/**** now calculate embeddings for the given prompt ****/\n  \n  let { stdout,stderr, StatusCode,Signal } = child_process.spawnSync(\n    'bash', [], { input:Command }\n  )\n  \n  stdout = stdout.toString().trim()\n  stderr = stderr.toString().trim()\n\n  switch (true) {\n    case (StatusCode == null):\n    case (StatusCode === 0):\n      msg.statusCode = (stdout === '' ? 204 : 200)\n      msg.payload    = ResponseFrom(stdout)\n      break\n    default:\n      msg.statusCode = 500 + StatusCode\n      msg.payload    = (stdout === '' ? '' : '>>>> stdout >>>>\\n' + stdout + '\\n') +\n                       '>>>> stderr >>>>\\n' + stderr +\n                       (Signal == null ? '' : '\\n' + Signal)\n      break\n  }\n\n  node.send([msg,null])\n})()\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "os",
+                "module": "os"
+            },
+            {
+                "var": "child_process",
+                "module": "child_process"
+            }
+        ],
+        "x": 2320,
+        "y": 160,
+        "wires": [
+            [
+                "1fd4b92b58c95f7a",
+                "8624b590dc7412ca"
+            ],
+            [
+                "dd7d4ac634761638"
+            ]
+        ]
+    }
+]
