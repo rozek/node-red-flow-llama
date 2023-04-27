@@ -6,7 +6,9 @@ This repository contains a function node for [Node-RED](https://nodered.org/) wh
 
 ![LLaMA HTTP Flow](./LLaMA-HTTP-Flow.png)
 
-Having the actual inference as a self-contained function node gives you the possibility to create your own user interface or even use it as part of an autonomous agent.
+Additionally, this repo also contains function nodes to tokenize a prompt or to calculate embeddings based on the Alpaca model.
+
+Having the inference, tokenization and embedding calculation as a self-contained function node gives you the possibility to create your own user interface or even use it as part of an autonomous agent.
 
 > Nota bene: these flows do not contain the actual model. You will have to request your own copy directly from Meta AI using their official [Request Form](https://docs.google.com/forms/d/e/1FAIpQLSfqNECQnMkycAp2jP4Z9TFX0cGR4uf7b_fBxjY_OjhJILlKGA/viewform).
 
@@ -39,15 +41,21 @@ Once you got the actual LLaMA model, follow the instructions found in section [P
 
 Afterwards, rename the file `ggml-model-q4_0.bin` to `ggml-llama-7b-q4.bin` and move (or copy) it into the same subfolder `ai` where you already placed the `llama` executable.
 
-### Importing the Function Node ###
+### Importing the Nodes ###
 
 Finally, open the Flow Editor of your Node-RED server and import the contents of [LLaMA-Function.json](./LLaMA-Function.json). After deploying your changes, you are ready to run LLaMA inferences directly from within Node-RED.
 
+Additionally, you may also import the contents of [LLaMA-Tokenization.json](./LLaMA-Tokenization.json) if you want to tokenize prompts, or of [LLaMA-Embeddings.json](./LLaMA-Embeddings.json) if you want to calculate embeddings for a given text.
+
 ## Usage ##
 
-The prompt itself and any inference parameters have to be passed as properties of the msg object. The prompt is expected in `msg.payload` and will later be replaced by the result of the inference.
+All function nodes expect their parameters as properties of the msg object. The prompt itself (or the input text to tokenize or calculate embeddings from) is expected in `msg.payload` and will later be replaced by the function result.
 
-The following properties are supported:
+All properties (except prompt or input text) are optional. If given, they should be strings (even if they contain numbers), this makes it simpler to extract them from an HTTP request.
+
+### Inference Node ###
+
+Inference supports the following properties:
 
 * `payload` - this is the actual prompt 
 * `seed` - seed value for the internal pseudo random number generator (integer, default: -1, use random seed for <= 0)
@@ -57,12 +65,27 @@ The following properties are supported:
 * `predict` - number of tokens to predict (integer ≧ -1, default: 128, -1 = infinity)
 * `topk` - top-k sampling limit (integer ≧ 1, default: 40)
 * `topp` - top-p sampling limit (0.0...1.0, default: 0.9)
-* `temperature` - temperature (0.0...1.0, default: 0.8)
+* `temperature` - temperature (0.0...2.0, default: 0.8)
 * `batches` - batch size for prompt processing (integer ≧ 1, default: 8)
 
-All properties (except the prompt itself) are optional. If given, they should be strings (even if they contain numbers), this makes it simpler to extract them from an HTTP request.
+### Tokenization Node ###
 
-## Example ##
+Tokenization supports the following properties:
+
+* `payload` - this is the actual input text 
+* `threads` - number of threads to use during computation (integer ≧ 1, default: 4)
+* `context` - size of the prompt context (0...2048, default: 512)
+
+### Embeddings Node ###
+
+Embeddings calculation supports the following properties:
+
+* `payload` - this is the actual input text  
+* `seed` - seed value for the internal pseudo random number generator (integer, default: -1, use random seed for <= 0)
+* `threads` - number of threads to use during computation (integer ≧ 1, default: 4)
+* `context` - size of the prompt context (0...2048, default: 512)
+
+## Inference Example ##
 
 The file [LLaMA-HTTP-Endpoint.json](./LLaMA-HTTP-Endpoint.json) contains an example which uses the LLaMA function node to answer HTTP requests. The prompt itself and any inference parameters have to be passed as query parameters, the result of the inference will then be returned in the body of the HTTP response.
 
