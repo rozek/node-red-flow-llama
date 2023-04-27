@@ -2,7 +2,7 @@
 
 Node-RED Flow (and web page example) for the LLaMA AI model
 
-This repository contains a function node for [Node-RED](https://nodered.org/) which can be used to run the [LLaMA model](https://ai.facebook.com/blog/large-language-model-llama-meta-ai/) using [llama.cpp](https://github.com/ggerganov/llama.cpp) within a Node-RED flow. **Inference is done on the CPU** (without requiring any special hardware) and still completes within a few seconds on a reasonably powerful computer.
+This repository contains a function node for [Node-RED](https://nodered.org/) which can be used to run the [LLaMA model](https://ai.facebook.com/blog/large-language-model-llama-meta-ai/) using [llama.cpp](https://github.com/rozek/llama.cpp) within a Node-RED flow. **Inference is done on the CPU** (without requiring any special hardware) and still completes within a few seconds on a reasonably powerful computer.
 
 ![LLaMA HTTP Flow](./LLaMA-HTTP-Flow.png)
 
@@ -29,9 +29,15 @@ Start by creating a subfolder called `ai` within the installation folder of your
 
 ### Building the Executable ###
 
-The actual "heavy lifting" is done by [llama.cpp](https://github.com/ggerganov/llama.cpp). Simply follow the instructions found in section [Usage](https://github.com/ggerganov/llama.cpp#usage) of the llama.cpp docs to build the `main` executable for your platform.
+The actual "heavy lifting" is done by [llama.cpp](https://github.com/rozek/llama.cpp). Simply follow the instructions found in section [Usage](https://github.com/rozek/llama.cpp#usage) of the llama.cpp docs to build the `main` executable for your platform.
 
-Afterwards, rename `main` to `llama` and copy it into the subfolder `ai` you created before.
+Afterwards, rename 
+
+* `main` to `llama`,
+* `tokenization` to `llama-tokenization` and
+* `embedding` to `llama-embeddings`
+
+and copy them into the subfolder `ai` you created before.
 
 ### Preparing the Model ###
 
