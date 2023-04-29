@@ -6,7 +6,7 @@ This repository contains a function node for [Node-RED](https://nodered.org/) wh
 
 ![LLaMA HTTP Flow](./LLaMA-HTTP-Flow.png)
 
-Additionally, this repo also contains function nodes to tokenize a prompt or to calculate embeddings based on the Alpaca model.
+Additionally, this repo also contains function nodes to tokenize a prompt or to calculate embeddings based on the LLaMA model.
 
 Having the inference, tokenization and embedding calculation as a self-contained function node gives you the possibility to create your own user interface or even use it as part of an autonomous agent.
 
