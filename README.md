@@ -2,6 +2,8 @@
 
 Node-RED Flow (and web page example) for the LLaMA AI model
 
+> Nota bene: if you are interested in serving LLMs from a Node-RED server, you may also be interested in [node-red-flow-openai-api](https://github.com/rozek/node-red-flow-openai-api), a set of flows which implement a relevant subset of OpenAI APIs and may act as a drop-in replacement for OpenAI in [LangChain](https://github.com/hwchase17/langchainjs) or similar tools and may directly be used from within [Flowise](https://github.com/rozek/Flowise), the no-code environment for LangChain
+
 This repository contains a function node for [Node-RED](https://nodered.org/) which can be used to run the [LLaMA model](https://ai.facebook.com/blog/large-language-model-llama-meta-ai/) using [llama.cpp](https://github.com/rozek/llama.cpp) within a Node-RED flow. **Inference is done on the CPU** (without requiring any special hardware) and still completes within a few seconds on a reasonably powerful computer.
 
 ![LLaMA HTTP Flow](./LLaMA-HTTP-Flow.png)
